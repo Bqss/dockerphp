@@ -1,0 +1,10 @@
+{
+    "name": "basofi/dockerphp",
+    "description": "docker environment for php",
+    "autoload": {
+        "psr-4": {
+            "Basofi\\Dockerphp\\": "src/"
+        }
+    },
+    "require": {}
+}

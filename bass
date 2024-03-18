@@ -96,10 +96,10 @@ function display_help {
   exit 0
 }
 
-function sail_is_not_running {
-  echo "${BOLD}Template is not running.${NC}" >&2
+function bass_is_not_running {
+  echo "${BOLD}Bass is not running.${NC}" >&2
   echo "" >&2
-  echo "${BOLD}You may Sail using the following commands:${NC} './vendor/bin/sail up' or './vendor/bin/sail up -d'" >&2
+  echo "${BOLD}You may run Bass using the following commands:${NC} './vendor/sail up' or './vendor/bin/sail up -d'" >&2
 
   exit 1
 }
