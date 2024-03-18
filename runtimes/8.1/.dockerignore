@@ -1,0 +1,7 @@
+# /node_modules
+# /vendor
+.git
+.ds_store
+.env
+docker-compose.*
+Dockerfile*

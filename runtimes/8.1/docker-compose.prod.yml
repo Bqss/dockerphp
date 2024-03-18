@@ -1,0 +1,49 @@
+services:
+    # web-service
+    web:
+        container_name: web
+        build:
+            context: .
+            dockerfile: Dockerfile.prod
+            target: php
+            args:
+                - APP_ENV=${APP_ENV}
+        restart: always
+        environment:
+            - NODE_VERSION=21.0
+            - APP_ENV=${APP_ENV}
+        networks:
+            - bass
+        volumes:
+            - .:/var/www
+        ports:
+            - 80:80
+        depends_on:
+            - database
+
+    # db-service
+    database:
+        container_name: database
+        image: mysql:8.1
+        restart: always
+        ports:
+            - 3306:3306
+        networks:
+            - bass
+        env_file:
+            - .env
+        environment:
+            - MYSQL_DATABASE=${DB_DATABASE}
+            - MYSQL_USER=${DB_USERNAME}
+            - MYSQL_PASSWORD=${DB_PASSWORD}
+            - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+        volumes:
+            - bass-sql:/var/lib/mysql
+
+volumes:
+    bass-sql:
+        driver: local
+
+networks:
+    bass:
+        driver: bridge

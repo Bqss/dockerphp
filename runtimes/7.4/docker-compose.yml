@@ -1,0 +1,24 @@
+services:
+
+  # web-service
+  web:
+    container_name: web
+    build:
+      context: ./docker/runtimes/7.4
+      dockerfile: Dockerfile.dev
+      target: php
+      args:
+        - APP_ENV=${APP_ENV}
+    restart: always
+    environment:
+      - NODE_VERSION=21.0
+      - APP_ENV=${APP_ENV}
+    networks:
+        - technowars
+    volumes:
+      - .:/var/www
+    ports:
+      - 8080:8000
+
+networks:
+  bass :

@@ -1,0 +1,175 @@
+#!/bin/bash
+
+# available template versions
+AVAILABLE_PHP_VERSIONS=("5.6" "7.0" "7.4" "8.0" "8.1" "8.2" "8.3")
+AVAILABLE_NODE_VERSIONS=("16.0" "18.0" "21.0")
+
+UNAMEOUT="$(uname -s)"
+
+# Verify operating system is supported...
+case "${UNAMEOUT}" in
+Linux*) MACHINE=linux ;;
+Darwin*) MACHINE=mac ;;
+*) MACHINE="UNKNOWN" ;;
+esac
+
+if [ "$MACHINE" == "UNKNOWN" ]; then
+  echo "Unsupported operating system [$(uname -s)]. This template supports macOS, Linux, and Windows (WSL2)." >&2
+  exit 1
+fi
+
+# Determine if stdout is a terminal...
+if test -t 1; then
+  # Determine if colors are supported...
+  ncolors=$(tput colors)
+
+  if test -n "$ncolors" && test "$ncolors" -ge 8; then
+    BOLD="$(tput bold)"
+    YELLOW="$(tput setaf 3)"
+    GREEN="$(tput setaf 2)"
+    RED="$(tput setaf 1)"
+    NC="$(tput sgr0)"
+  fi
+fi
+
+# getting php version
+function getPhpVersion {
+  echo -e "${BOLD}What PHP version do you want to use?${NC}" 1>&2
+  echo -e "Available versions: \n" 1>&2
+  for version in "${AVAILABLE_PHP_VERSIONS[@]}"; do
+    echo -e "${GREEN}- $version${NC}" 1>&2
+  done
+  echo -e "" 1>&2
+  read -p "PHP version: " phpVersion
+  echo $phpVersion
+}
+
+# function getNodeVersion {
+#   echo -e "${BOLD}What Node version do you want to use?${NC}${BOLD} default(18.0)${NC}" 1>&2
+#   echo -e "Available versions: \n" 1>&2
+#   for version in "${AVAILABLE_NODE_VERSIONS[@]}"; do
+#     echo -e "${GREEN}- $version${NC}" 1>&2
+#   done
+#   echo -e "" 1>&2
+#   read -p "Node version: " nodeVersion
+#   echo $nodeVersion
+# }
+
+#validating input based on the available options
+# 1st argument is the array of available options
+# 2nd argument is the user input
+function validateUserInput {
+
+  local -n arr=$1
+  echo $arr
+  for option in "${arr[@]}"; do
+    if [ "$option" == "$2" ]; then
+      return 0
+      exit
+    fi
+  done
+  return 1
+}
+
+# copying dependencies for the selected PHP version
+function copyDeps {
+  if [ -d "./docker/runtimes/$1" ]; then
+    echo "Copying dependencies for PHP $1 ...."
+  else
+    echo "folder ./docker/runtimes/$1 does not exist"
+    exit 1
+  fi
+
+  cp ./docker/runtimes/$1/docker-compose.yml .
+  cp ./docker/runtimes/$1/docker-compose.prod.yml .
+
+}
+
+function display_help {
+  echo -e "\nUsage: \n"
+  echo -e "- init: to initialize the project with the selected PHP version\n"
+  echo -e "Available PHP versions: \n"
+  for version in "${AVAILABLE_PHP_VERSIONS[@]}"; do
+    echo -e "${GREEN}- $version${NC}"
+  done
+  echo -e "\n"
+  exit 0
+}
+
+function sail_is_not_running {
+  echo "${BOLD}Template is not running.${NC}" >&2
+  echo "" >&2
+  echo "${BOLD}You may Sail using the following commands:${NC} './vendor/bin/sail up' or './vendor/bin/sail up -d'" >&2
+
+  exit 1
+}
+
+# main code starts here
+
+if [ "$1" == "init" ]; then
+
+  if [ -f "docker-compose.yml" ]; then
+    echo -e "${RED}docker-compose.yml already exists${NC}"
+    exit 1
+  fi
+  if [ -f "Dockerfile" ]; then
+    echo -e "${RED}Dockerfile already exists${NC}"
+    exit 1
+  fi
+  if [ -f ".dockerignore" ]; then
+    echo -e "${RED}.dockerignore already exists${NC}"
+    exit 1
+  fi
+
+  echo -e "\n${GREEN}Welcome to the PHP Docker Codeigniter template${NC}"
+  PHP_VERSION=$(getPhpVersion)
+
+  validateUserInput AVAILABLE_PHP_VERSIONS $PHP_VERSION
+  if [ $? -eq 0 ]; then
+    copyDeps $PHP_VERSION
+  else
+    echo -e "${RED}PHP version is not valid${NC}"
+    exit 1
+  fi
+  # validateUserInput AVAILABLE_NODE_VERSIONS $NODE_VERSION
+
+elif [[ "$1" == "-h" || "$1" == "--help" || "$1" == "--h" || "$1" == "help" ]]; then
+  display_help
+  exit 0
+else
+  docker compose &>/dev/null
+  if [ $? == 0 ]; then
+    DOCKER_COMPOSE=(docker compose)
+  else
+    DOCKER_COMPOSE=(docker-compose)
+  fi
+
+  args=()
+  EXEC="yes"
+
+  args+=(sail)
+  args+=(up)
+
+  echo "${args[@]}"
+  # # Check if Docker is running...
+  if ! docker info >/dev/null 2>&1; then
+    echo "${BOLD}Docker is not running.${NC}" >&2
+    exit 1
+  fi
+
+  if [ "$1" == "composer" ]; then
+    shift 1
+    if [ "$EXEC" == "yes" ]; then
+      ARGS+=(exec -u sail)
+      [ ! -t 0 ] && ARGS+=(-T)
+      ARGS+=("$APP_SERVICE" "composer" "$@")
+    else
+      echo "Template is not running"
+    fi
+  fi
+fi
+
+"${DOCKER_COMPOSE[@]}" "${ARGS[@]}"
+exit $?
+
+echo -e "\n${RED}Command not found${NC}, RUN help , -h, --h, --help , to get help\n"

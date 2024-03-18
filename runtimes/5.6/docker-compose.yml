@@ -1,0 +1,47 @@
+services:
+
+  # web-service
+  web:
+    container_name: web
+    build:
+      context: ./docker/runtimes/8.0
+      target: php
+      args:
+        - APP_ENV=${APP_ENV}
+    restart: always
+    environment:
+      - NODE_VERSION=21.0
+      - APP_ENV=${APP_ENV}
+    networks:
+        - technowars
+    volumes:
+      - .:/var/www
+    ports:
+      - 8080:8000
+    depends_on:
+      - database
+
+  # db-service
+  database:
+    container_name: database
+    image: mysql:8.1
+    restart: always
+    ports:
+      - 3306:3306
+    networks:
+      - technowars
+    env_file:
+      - .env
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  db-data: ~
+
+networks:
+  technowars:
