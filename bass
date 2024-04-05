@@ -41,7 +41,7 @@ function getPhpVersion {
   done
   echo -e "" 1>&2
   read -p "PHP version: " phpVersion
-  echo $phpVersion
+  echo $phpVersion 
 }
 
 # function getNodeVersion {
@@ -61,7 +61,7 @@ function getPhpVersion {
 function validateUserInput {
 
   local -n arr=$1
-  echo $arr
+  echo $arr 
   for option in "${arr[@]}"; do
     if [ "$option" == "$2" ]; then
       return 0
@@ -73,15 +73,19 @@ function validateUserInput {
 
 # copying dependencies for the selected PHP version
 function copyDeps {
-  if [ -d "./docker/runtimes/$1" ]; then
+  if [ -d "./vendor/docker/runtimes/$1" ]; then
     echo "Copying dependencies for PHP $1 ...."
   else
-    echo "folder ./docker/runtimes/$1 does not exist"
+    echo "folder ./vendor/docker/runtimes/$1 does not exist"
     exit 1
   fi
 
-  cp ./docker/runtimes/$1/docker-compose.yml .
-  cp ./docker/runtimes/$1/docker-compose.prod.yml .
+  if [ ! -f "./env" ]; then
+    cp ./vendor/docker/.env .
+  fi
+
+  cp ./vendor/docker/runtimes/$1/docker-compose.yml .
+  cp ./vendor/docker/runtimes/$1/docker-compose.prod.yml .
 
 }
 
@@ -96,10 +100,10 @@ function display_help {
   exit 0
 }
 
-function bass_is_not_running {
-  echo "${BOLD}Bass is not running.${NC}" >&2
+function sail_is_not_running {
+  echo "${BOLD}Template is not running.${NC}" >&2
   echo "" >&2
-  echo "${BOLD}You may run Bass using the following commands:${NC} './vendor/sail up' or './vendor/bin/sail up -d'" >&2
+  echo "${BOLD}You may Sail using the following commands:${NC} './vendor/bin/sail up' or './vendor/bin/sail up -d'" >&2
 
   exit 1
 }
@@ -123,10 +127,10 @@ if [ "$1" == "init" ]; then
 
   echo -e "\n${GREEN}Welcome to the PHP Docker Codeigniter template${NC}"
   PHP_VERSION=$(getPhpVersion)
+  validateUserInput AVAILABLE_PHP_VERSIONS $PHP_VERSION > /dev/null
 
-  validateUserInput AVAILABLE_PHP_VERSIONS $PHP_VERSION
   if [ $? -eq 0 ]; then
-    copyDeps $PHP_VERSION
+    copyDeps $PHP_VERSION 
   else
     echo -e "${RED}PHP version is not valid${NC}"
     exit 1
@@ -147,9 +151,6 @@ else
   args=()
   EXEC="yes"
 
-  args+=(sail)
-  args+=(up)
-
   echo "${args[@]}"
   # # Check if Docker is running...
   if ! docker info >/dev/null 2>&1; then
@@ -160,7 +161,7 @@ else
   if [ "$1" == "composer" ]; then
     shift 1
     if [ "$EXEC" == "yes" ]; then
-      ARGS+=(exec -u sail)
+      ARGS+=(exec -u basofi)
       [ ! -t 0 ] && ARGS+=(-T)
       ARGS+=("$APP_SERVICE" "composer" "$@")
     else
