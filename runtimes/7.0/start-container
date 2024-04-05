@@ -2,17 +2,11 @@
 
  if [ $APP_ENV = "local" ]; then
   echo "Starting container"
-
   php-fpm -D
-
   service nginx start
-
   echo "Nginx started"
-
   echo "Container started"
-
   tail -f /dev/null
-
  else
     docker-compose -f docker-compose.prod.yml up -d
  fi
