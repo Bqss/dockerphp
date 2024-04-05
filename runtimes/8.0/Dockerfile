@@ -1,4 +1,4 @@
-FROM php:7.4-fpm 
+FROM php:8.0-fpm 
 
 WORKDIR /var/www
 
@@ -12,9 +12,9 @@ RUN install-php-extensions gd xdebug pdo_mysql mysqli intl
 # Copy composer executable.
 COPY --from=composer:2.3.5 /usr/bin/composer /usr/bin/composer
 
-COPY --from=node:16.0 /usr/local/bin /usr/local/bin
-COPY --from=node:16.0 /usr/local/lib /usr/local/lib
-COPY --from=node:16.0 /opt /opt
+COPY --from=node:18.0 /usr/local/bin /usr/local/bin
+COPY --from=node:18.0 /usr/local/lib /usr/local/lib
+COPY --from=node:18.0 /opt /opt
 
 RUN groupadd -g 1000 bass
 RUN useradd -ms /bin/bash --no-user-group -g 1000 -u 1000 bass

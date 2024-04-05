@@ -73,19 +73,19 @@ function validateUserInput {
 
 # copying dependencies for the selected PHP version
 function copyDeps {
-  if [ -d "./vendor/docker/runtimes/$1" ]; then
+  if [ -d "./vendor/dockerphp/runtimes/$1" ]; then
     echo "Copying dependencies for PHP $1 ...."
   else
-    echo "folder ./vendor/docker/runtimes/$1 does not exist"
+    echo "folder ./vendor/dockerphp/runtimes/$1 does not exist"
     exit 1
   fi
 
   if [ ! -f "./env" ]; then
-    cp ./vendor/docker/.env .
+    cp ./vendor/dockerphp/.env .
   fi
 
-  cp ./vendor/docker/runtimes/$1/docker-compose.yml .
-  cp ./vendor/docker/runtimes/$1/docker-compose.prod.yml .
+  cp ./vendor/dockerphp/runtimes/$1/docker-compose.yml .
+  cp ./vendor/dockerphp/runtimes/$1/docker-compose.prod.yml .
 
 }
 

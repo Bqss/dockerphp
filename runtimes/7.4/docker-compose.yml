@@ -1,24 +1,43 @@
+version: '3'
 services:
-
-  # web-service
   web:
-    container_name: web
     build:
-      context: ./docker/runtimes/7.4
-      dockerfile: Dockerfile.dev
-      target: php
+      context: ./vendor/dockerphp/runtimes/7.4
       args:
         - APP_ENV=${APP_ENV}
-    restart: always
+    restart: on-failure
     environment:
-      - NODE_VERSION=21.0
-      - APP_ENV=${APP_ENV}
+      - NODE_VERSION=${NODE_VERSION:-21.0}
+      - APP_ENV=${APP_ENV:-local}
     networks:
-        - technowars
+        - bass
     volumes:
       - .:/var/www
+      - ./vendor/dockerphp/runtimes/7.4/config/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - db
     ports:
-      - 8080:8000
-
+      - ${APP_PORT:-80}:80
+  db: 
+    image: mysql:5.7.44
+    restart: on-failure
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_HOST: "%"
+      TZ: "Aia/Jakarta"
+    networks:
+      - bass
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - ${DB_PORT:-3306}:3306
 networks:
-  bass :
+  bass:
+    driver: bridge
+    
+volumes:
+  dbdata:
+    driver: local
+

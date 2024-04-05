@@ -1,9 +1,9 @@
 #!/bin/bash
 
-
 echo "Starting container"
-
-php -S 0.0.0.0:80 -t /var/www
-
+php-fpm -D
+service nginx start
+echo "Nginx started"
+echo "Container started"
 tail -f /dev/null
 

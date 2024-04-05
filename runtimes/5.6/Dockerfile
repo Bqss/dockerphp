@@ -1,6 +1,11 @@
-FROM php:7.4-fpm 
+FROM php:5.6-fpm 
 
 WORKDIR /var/www
+
+RUN echo "deb http://archive.debian.org/debian/ stretch main \
+deb-src http://archive.debian.org/debian/ stretch main \
+deb http://security.debian.org/debian-security stretch/updates main \
+deb-src http://security.debian.org/debian-security stretch/updates main" > /etc/apt/sources.list
 
 # Install dependencies.
 RUN apt-get update && apt-get upgrade -y && apt-get install -y nginx
@@ -12,9 +17,9 @@ RUN install-php-extensions gd xdebug pdo_mysql mysqli intl
 # Copy composer executable.
 COPY --from=composer:2.3.5 /usr/bin/composer /usr/bin/composer
 
-COPY --from=node:16.0 /usr/local/bin /usr/local/bin
-COPY --from=node:16.0 /usr/local/lib /usr/local/lib
-COPY --from=node:16.0 /opt /opt
+COPY --from=node:14.0 /usr/local/bin /usr/local/bin
+COPY --from=node:14.0 /usr/local/lib /usr/local/lib
+COPY --from=node:14.0 /opt /opt
 
 RUN groupadd -g 1000 bass
 RUN useradd -ms /bin/bash --no-user-group -g 1000 -u 1000 bass

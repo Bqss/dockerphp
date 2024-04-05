@@ -1,47 +1,43 @@
+version: '3'
 services:
-
-  # web-service
   web:
-    container_name: web
     build:
-      context: ./docker/runtimes/8.0
-      target: php
+      context: ./vendor/dockerphp/runtimes/8.0
       args:
         - APP_ENV=${APP_ENV}
-    restart: always
+    restart: on-failure
     environment:
-      - NODE_VERSION=21.0
-      - APP_ENV=${APP_ENV}
+      - NODE_VERSION=${NODE_VERSION:-21.0}
+      - APP_ENV=${APP_ENV:-local}
     networks:
-        - technowars
+        - bass
     volumes:
       - .:/var/www
-    ports:
-      - 8080:8000
+      - ./vendor/dockerphp/runtimes/8.0/config/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - database
-
-  # db-service
-  database:
-    container_name: database
-    image: mysql:8.1
-    restart: always
+      - db
     ports:
-      - 3306:3306
-    networks:
-      - technowars
-    env_file:
-      - .env
+      - ${APP_PORT:-80}:80
+  db: 
+    image: mysql:5.7.44
+    restart: on-failure
     environment:
-      - MYSQL_DATABASE=${DB_DATABASE}
-      - MYSQL_USER=${DB_USERNAME}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_HOST: "%"
+      TZ: "Aia/Jakarta"
+    networks:
+      - bass
     volumes:
-      - db-data:/var/lib/mysql
-
-volumes:
-  db-data: ~
-
+      - dbdata:/var/lib/mysql
+    ports:
+      - ${DB_PORT:-3306}:3306
 networks:
-  technowars:
+  bass:
+    driver: bridge
+    
+volumes:
+  dbdata:
+    driver: local
+
