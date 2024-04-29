@@ -4,9 +4,6 @@ if [ ! -f ".env" ]; then
   cp .env.example .env
 fi
 
-if [ ! -f "vendor/autoload.php" ]; then
-  composer install
-fi
 
 #nginx -g "daemon off;"
 echo "Running in development mode"

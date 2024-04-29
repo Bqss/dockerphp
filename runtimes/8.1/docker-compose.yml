@@ -13,7 +13,7 @@ services:
         - bass
     volumes:
       - .:/var/www
-      - ./vendor/docker/runtimes/8.1/config/nginx.conf:/etc/nginx/nginx.conf
+      - ./vendor/dockerphp/runtimes/8.1/config/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - db
     ports:
@@ -36,9 +36,9 @@ services:
     ports:
       - ${DB_CLIENT_PORT:-3306}:3306
     healthcheck:
-    test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
-    retries: 3
-    timeout: 5s
+      test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+      retries: 3
+      timeout: 5s
 networks:
   bass:
     driver: bridge
