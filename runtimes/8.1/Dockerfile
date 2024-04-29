@@ -1,5 +1,5 @@
 FROM node:18.0 as node
-FROM php:8.1-fpm 
+FROM php:8.1-fpm
 
 WORKDIR /var/www
 
@@ -15,7 +15,8 @@ RUN install-php-extensions gd xdebug pdo_mysql mysqli intl calendar exif  gettex
 # Copy composer executable.
 COPY --from=composer:2.3.5 /usr/bin/composer /usr/bin/composer
 
-# install 
+
+# install
 COPY --from=node /usr/local/bin /usr/local/bin
 COPY --from=node /usr/local/lib /usr/local/lib
 COPY --from=node /opt /opt
@@ -29,12 +30,14 @@ RUN rm /etc/nginx/sites-available/default
 RUN rm -R /var/www/html
 
 RUN groupadd -g 1000 bass
-RUN useradd -ms /bin/bash --no-user-group -g 1000 -u 1000 bass
+RUN useradd -ms /bin/bash --no-user-group -g 1000 -u 1000 bass && \
+    echo "bass:password" | chpasswd
+
 
 COPY ./start-container /usr/local/bin/start-container
 RUN chmod +x /usr/local/bin/start-container
 EXPOSE 8000
 
-USER bass
-
 ENTRYPOINT ["start-container"]
+
+USER 1000

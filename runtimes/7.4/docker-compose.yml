@@ -26,7 +26,8 @@ services:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_HOST: "%"
-      TZ: "Aia/Jakarta"
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
+      TZ: "Asia/Jakarta"
     networks:
       - bass
     volumes:

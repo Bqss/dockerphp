@@ -4,12 +4,11 @@ if [ ! -f ".env" ]; then
   cp .env.example .env
 fi
 
-if [ ! $APP_ENV=="local" ]; then
-  echo "Running in production mode"
-  php artisan optimize:clear
-  php-fpm -D
-  nginx -g "daemon off;"
-else
-  echo "Running in development mode"
-  php artisan serve --host=0.0.0.0 --port=8000
+if [ ! -f "vendor/autoload.php" ]; then
+  composer install
 fi
+
+#nginx -g "daemon off;"
+echo "Running in development mode"
+tail -f > /dev/null
+

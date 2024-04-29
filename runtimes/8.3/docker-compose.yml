@@ -13,28 +13,32 @@ services:
         - bass
     volumes:
       - .:/var/www
-      - ./vendor/dockerphp/runtimes/8.3/config/nginx.conf:/etc/nginx/nginx.conf
+      - ./vendor/docker/runtimes/8.3/config/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - db
     ports:
-      - ${APP_PORT:-80}:8000
+      - ${APP_PORT:-80}:80
       - ${VITE_PORT:-5173}:${VITE_PORT:-5173}
   db:
     image: mysql:8.0
     restart: on-failure
     environment:
-      - MYSQL_DATABASE=${DB_DATABASE}
-      - MYSQL_USER=${DB_USERNAME}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
-      - MYSQL_ROOT_HOST=%
-      - TZ=Asia/Jakarta
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:${DB_PASSWORD}}
+      TZ: "Aia/Jakarta"
     networks:
       - bass
     volumes:
       - dbdata:/var/lib/mysql
     ports:
       - ${DB_PORT:-3306}:3306
+    healthcheck:
+    test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+    retries: 3
+    timeout: 5s
 networks:
   bass:
     driver: bridge

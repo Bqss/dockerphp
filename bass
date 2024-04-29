@@ -85,8 +85,6 @@ function copyDeps {
   fi
 
   cp ./vendor/dockerphp/runtimes/$1/docker-compose.yml .
-  cp ./vendor/dockerphp/runtimes/$1/docker-compose.prod.yml .
-
 }
 
 function display_help {
