@@ -33,7 +33,7 @@ services:
     volumes:
       - dbdata:/var/lib/mysql
     ports:
-      - ${DB_PORT:-3306}:3306
+      - ${DB_CLIENT_PORT:-3306}:3306
 networks:
   bass:
     driver: bridge
